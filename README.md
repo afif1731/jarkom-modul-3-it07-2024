@@ -193,49 +193,6 @@ apt-get update
 apt-get install dnsutils apache2-utils lynx -y
 ```
 
-- Chani (Database Server) - `init-script.sh`
-```bash
-apt-get update
-apt-get install mariadb-server -y
-```
-
-- Stilgar (Load Balancer) - `init-script.sh`
-```bash
-apt-get update
-apt-get install nginx -y
-```
-
-- PHP Worker - `init-script.sh`
-```bash
-apt-get update
-apt-get install apache2 wget unzip php -y
-
-service apache2 start
-
-wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1lmnXJUbyx1JDt2OA5z_1dEowxozfkn30' -O 'harkonen.zip'
-unzip harkonen.zip
-
-mkdir -p /var/www/jarkom_it07
-
-# meletakkan komponen web
-cp /root/modul-3/* /var/www/jarkom_it07/
-```
-
-- Laraver Worker - `init-script.sh`
-```bash
-apt-get update
-apt-get install apache2 wget unzip php git -y
-
-service apache2 start
-
-git clone https://github.com/martuafernando/laravel-praktikum-jarkom.git laravel_web
-
-mkdir -p /var/www/jarkom_ito7
-
-# meletakkan komponen web
-cp /root/laravel_web/* /var/www/jarkom_it07/
-```
-
 ### Konfigurasi DHCP Relay
 
 Atur agar DHCP Relay (Arakis) mengarah ke DHCP Server (Mohiam) dan Interface nya terbuka untuk eth1 - eth4
@@ -272,7 +229,7 @@ mkdir /etc/bind/jarkom_it07
 
 Kemudian buat file konfigurasi untuk masing-masing domain dengan ketentuan :
 
-atreides.it07.com mengarah ke laravel Worker `Leto`
+atreides.it07.com mengarah ke Laravel Worker `Leto`
 
 - `/etc/bind/jarkom_it07/atreides.it07.com`
 ```conf
@@ -291,7 +248,7 @@ $TTL    604800
 @             IN      A       10.67.2.2 ; ini IP Leto
 ```
 
-sementara harkonen.it07.com mengarah ke laravel Worker `Vladimir`
+sementara harkonen.it07.com mengarah ke PHP Worker `Vladimir`
 
 - `/etc/bind/jarkom_it07/harkonen.it07.com`
 ```conf
@@ -348,6 +305,7 @@ subnet 10.67.1.0 netmask 255.255.255.0 {
 
 Hapus file dhcpd.pid lalu restart service
 
+- `terminal`
 ```bash
 rm /var/run/dhcpd.pid
 
@@ -427,9 +385,9 @@ options {
 
 Jalankan perintah `ifconfig` pada client, nilai inet pada eth0 akan sesuai dengan IP yang sudah kita mapping sebelumnya
 
-Lakukan ping pada `atreides.it07.com` dan `harkonen.it07.com`, terkadang responsenya akan datang cukup lama,
+Lakukan **ping** pada `atreides.it07.com` dan `harkonen.it07.com`, terkadang responsenya akan datang cukup lama,
 
-namun untuk memastikan bahwa sudah bisa terhubung pada DNS server, lakukan nslookup pada `atreides.it07.com` dan `harkonen.it07.com` lalu pastikan bahwa address dari masing masing domain sesuai dengan yang telah dikonfigurasi pada DNS Server.
+namun untuk memastikan bahwa sudah bisa terhubung pada DNS server, lakukan **nslookup** pada `atreides.it07.com` dan `harkonen.it07.com` lalu pastikan bahwa address dari masing masing domain sesuai dengan yang telah dikonfigurasi pada DNS Server.
 
 ## No.5
 
@@ -442,7 +400,7 @@ Tambahkan lease time pada kedua konfigurasi subnet client dengan ketentuan:
 | Harkonen     | 5 menit (300 s)   | 87 menit (5220 s) |
 | Atreides     | 20 menit (1200 s) | 87 menit (5220 s) |
 
-- - `/etc/dhcp/dhcpd.conf`
+- `/etc/dhcp/dhcpd.conf`
 ```conf
 # Konfigurasi untuk subnet Harkonen
 subnet 10.67.1.0 netmask 255.255.255.0 {
