@@ -73,14 +73,12 @@ iface eth0 inet static
 ```
 auto eth0
 iface eth0 inet dhcp
-up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - Paul (Client)
 ```
 auto eth0
 iface eth0 inet dhcp
-up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
 - Chani (Database Server)
@@ -426,12 +424,456 @@ subnet 10.67.2.0 netmask 255.255.255.0 {
 ```
 
 ## No.6
+
+### Menginstal keperluan pada PHP Worker
+
+Untuk menjalankan website PHP pada worker, maka keperluan berikut perlu diinstal pada setiap worker PHP (`Vladimir`, `Rabban`, dan `Feyd`)
+
+- `terminal`
+```bash
+apt-get update
+apt-get install nginx wget unzip php7.3 php-fpm -y
+```
+
+Nantinya website ini akan dijalankan menggunakan PHP 7.3 dan web server nginx
+
+Website yang dimaksud senndiri terdapat pada [link berikut](https://drive.google.com/file/d/1lmnXJUbyx1JDt2OA5z_1dEowxozfkn30/view).
+
+- `terminal`
+```bash
+wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1lmnXJUbyx1JDt2OA5z_1dEowxozfkn30' -O 'harkonen.zip'
+unzip harkonen.zip
+
+# meletakkan komponen web
+mkdir -p /var/www/jarkom_it07
+mv /root/modul-3/* /var/www/jarkom_it07/
+
+# menghapus hasil download
+rmdir /root/modul-3
+rm harkonen.zip
+```
+
+### Konfigurasi Web Server
+
+Web server yang sudah diinstal dan Komponen web yang sudah didownload perlu dikonfigurasikan agar dapat dijalankan dan diakses oleh client.
+
+Dibuat file konfigurasi baru pada `/etc/nginx/sites-available/` dengan nama `jarkom_it07.conf`
+
+- `/etc/nginx/sites-available/jarkom_it07.conf`
+```conf
+server {
+    listen 80;
+
+    server_name _;
+
+    root /var/www/jarkom_it07;
+    index index.php index.html index.htm;
+    
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+    }
+
+    error_log /var/log/nginx/jarkom_it07_error.log;
+    access_log /var/log/nginx/jarkom_it07_access.log;
+}
+```
+
+Restart service nginx lalu periksa hasilnya dengan mengaksesnya melalui client
+
 ## No.7
+
+### Menginstal Keperluan pada Load Balancer
+
+Instal keperluan pada Stilgar (Load Balancer)
+
+- `terminal`
+```
+apt-get update
+apt-get install nginx -y
+```
+
+### Konfigurasi Load Balancer
+
+Secara default, load balancer yang digunakan pada nginx adalah load balancer dengan metode `Round Robin`. Konfigurasi dilakukan dengan membuat file konfigurasi baru pada `/etc/nginx/sites-available/`, isinya adalah seperti berikut:
+
+- `/etc/nginx/sites-available/round_robbin_3w.conf`
+```conf
+upstream round_robin_3w  {
+    server 10.67.1.2; #Vladimir
+    server 10.67.1.3; #Rabban
+    server 10.67.1.4; #Feyd
+}
+
+server {
+    listen 8000;
+        location / {
+            proxy_pass http://round_robin_3w;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/loadb_error.log;
+    access_log /var/log/nginx/loadb_access.log;
+}
+```
+
+Aktifkan konfigurasi tersebut lalu restart service nginx
+
+```bash
+ln -s /etc/nginx/sites-available/round_robbin_3w.conf /etc/nginx/sites-enabled/round_robbin_3w
+
+service nginx restart
+```
+
+Lakukan pengujian menggunakan apache benchmark pada tujuan ip load balancer dengan port 8000
+
+```bash
+ab -n 5000 -c 150 http://10.67.4.3:8000/
+```
+
+![ab 5000 150](./img/benchmark_5000_150.png)
+
+Hasil yang didapat
+
+![hasil ab](./img/no_7_hasil.png)
+
 ## No.8
+
+### Membuka Port Load Balancer
+
+Untuk memudahkan pengujian, maka dibuka beberapa port baru pada load balancer dengan setiap port memiliki metode load balancing yang berbeda
+
+Sehingga Hasil akhirnya akan menajdi seperti berikut
+
+| Port     | Method             | Worker(s) |
+| -------- | ------------------ | --------- |
+| 8000     | Round Robin        | 3 Workers |
+| 8001     | IP Hash            | 3 Workers |
+| 8002     | Generic Hash       | 3 Workers |
+| 8003     | Least Conenction   | 3 Workers |
+
+Untuk setiap metode, maka dibuatlah file konfigurasi baru
+
+- `/etc/nginx/sites-available/ip_hash_3w.conf`
+```conf
+upstream ip_hash_3w  {
+    ip_hash;
+    server 10.67.1.2; #Vladimir
+    server 10.67.1.3; #Rabban
+    server 10.67.1.4; #Feyd
+}
+
+server {
+    listen 8001;
+
+        location / {
+            proxy_pass http://ip_hash_3w;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/loadb_error.log;
+    access_log /var/log/nginx/loadb_access.log;
+}
+```
+
+- `/etc/nginx/sites-available/gen_hash_3w.conf`
+```conf
+upstream gen_hash_3w  {
+    hash $request_uri consistent;
+    server 10.67.1.2; #Vladimir
+    server 10.67.1.3; #Rabban
+    server 10.67.1.4; #Feyd
+}
+
+server {
+    listen 8002;
+
+        location / {
+            proxy_pass http://gen_hash_3w;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/loadb_error.log;
+    access_log /var/log/nginx/loadb_access.log;
+}
+```
+
+- `/etc/nginx/sites-available/least_conn_3w.conf`
+```conf
+upstream least_conn_3w  {
+    least_conn;
+    server 10.67.1.2; #Vladimir
+    server 10.67.1.3; #Rabban
+    server 10.67.1.4; #Feyd
+}
+
+server {
+    listen 8003;
+
+        location / {
+            proxy_pass http://least_conn_3w;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/loadb_error.log;
+    access_log /var/log/nginx/loadb_access.log;
+}
+```
+
+### Pengujian menggunakan Script
+
+Dibuat bash script yang dapat memudahkan pengujian, script dapat diakses [di sini](./scripts/LB-test.sh)
+
+Saat script dijalankan, pilih `Multi Test - By LB Method` dan masukkan jumlah request beserta concurrency nya.
+
+![setup](./img/script-setup.png)
+
+Kemudian didapat hasil seperti berikut
+
+![result](./img/script-result.png)
+
+Hasil lengkapnya dapat diakses pada path `/root/report/`
+
+Analisis kemudian dilakukan pada hasil tersebut untuk kemudian dibuat laporan yang dapat diakses melalui [link berikut]()
+
 ## No.9
+
+### Membuka Port Load Balancer
+
+Sama seperti sebelumnya, untuk memudahkan pengujian, maka dibuka beberapa port baru pada load balancer dengan setiap port memiliki jumlah worker yang berbeda
+
+Sehingga hasil akhirnya akan menajdi seperti berikut
+
+| Port     | Method             | Worker(s) |
+| -------- | ------------------ | --------- |
+| 8003     | Least Conenction   | 3 Workers |
+| 8004     | Least Conenction   | 2 Workers |
+| 8005     | Least Conenction   | 1 Workers |
+
+Untuk setiap jumlah, maka dibuatlah file konfigurasi baru. Karena least connection dengan 3 worker telah berjalan, maka hanya perlu menambah dua konfigurasi lagi
+
+- `/etc/nginx/sites-available/least_conn_2w.conf`
+```conf
+upstream least_conn_2w  {
+    least_conn;
+    server 10.67.1.2; #Vladimir
+    server 10.67.1.3; #Rabban
+    #server 10.67.1.4; #Feyd
+}
+
+server {
+    listen 8004;
+
+        location / {
+            proxy_pass http://least_conn_2w;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/loadb_error.log;
+    access_log /var/log/nginx/loadb_access.log;
+}
+```
+
+- `/etc/nginx/sites-available/least_conn_1w.conf`
+```conf
+upstream least_conn_1w  {
+    least_conn;
+    server 10.67.1.2; #Vladimir
+    #server 10.67.1.3; #Rabban
+    #server 10.67.1.4; #Feyd
+}
+
+server {
+    listen 8005;
+
+        location / {
+            proxy_pass http://least_conn_1w;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+
+    error_log /var/log/nginx/loadb_error.log;
+    access_log /var/log/nginx/loadb_access.log;
+}
+```
+
+### Pengujian menggunakan Script
+
+Dibuat bash script yang dapat memudahkan pengujian, script dapat diakses [di sini](./scripts/LB-test.sh)
+
+Saat script dijalankan, pilih `Multi Test - By LB Method` dan masukkan jumlah request beserta concurrency nya.
+
+![setup](./img/script-setup2.png)
+
+Kemudian didapat hasil seperti berikut
+
+![result](./img/script-result2.png)
+
+Hasil lengkapnya dapat diakses pada path `/root/report/`
+
+Analisis kemudian dilakukan pada hasil tersebut untuk kemudian dibuat laporan yang dapat diakses melalui [link berikut]()
+
 ## No.10
+
+### Menambahkan Konfigurasi pada Load Balancer
+
+tambahkan konfigurasi auth_basic untuk mengatur autentikasi pada load balancer
+
+- `/etc/nginx/sites-available/round_robbin_3w.conf`
+```conf
+location / {
+            auth_basic "Super Secret - Do Not Pass";
+            auth_basic_user_file /etc/nginx/supersecret/htpasswd;
+            proxy_pass http://round_robin_3w;
+            proxy_set_header    X-Real-IP $remote_addr;
+            proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header    Host $http_host;
+        }
+```
+
+### Mengatur keperluan autentikasi
+
+Install apache2-utils untuk menggunakan perintah `htpasswd`
+
+```bash
+apt-get install apache2-utils
+```
+
+Buat credential baru untuk username dan password sesuai dnegan permintaan soal yang kemudian akan disimpan pada file `/etc/nginx/supersecret/htpasswd`
+
+```bash
+htpasswd -bc /etc/nginx/supersecret/htpasswd secmart kcksit07
+```
+
+lakukan restart pada service nginx kemudian uji pada client
+
+```bash
+lynx 10.67.4.3:8000
+```
+![user auth](./img/auth.png)
+
 ## No.11
+
+### Menambahkan Konfigurasi pada Laod Balancer
+
+Pada konfigurasi load balancer, buat pengaturan tambahan yang akan menghapus path `/dune` kemudian mengarahkannya kepada `https://www.dunemovie.com.au` diikuti dengan path yang mungkin ditambahkan setelah /dune
+
+- `/etc/nginx/sites-available/round_robbin_3w.conf`
+```
+location ~ /dune {
+            rewrite ^/dune(.*)$ /$1 break;
+            proxy_pass https://www.dunemovie.com.au:443;
+            break;
+        }
+```
+
+Kemudian lakukan pengujian menggunakan lynx
+
+```bash
+lynx 10.67.4.3:8000/dune
+```
+
+![tes1](./img/tes1.png)
+
+![tesh1](./img/tesh1.png)
+
+Proxy pass juga dapat meneruskan path yang diletakkan setelah `/dune`
+
+```bash
+lynx 10.67.4.3:8000/dune/characters
+```
+
+![tes1](./img/tes2.png)
+
+![tesh1](./img/tesh2.png)
+
 ## No.12
+
+### Menambahkan IP yang diizinkan
+
+Tambahkan semua IP yang diizinkan soal pada config load balancer
+
+- `/etc/nginx/sites-available/round_robbin_3w.conf`
+```conf
+location / {
+    allow 10.67.1.37;
+    allow 10.67.1.67;
+    allow 10.67.2.203;
+    allow 10.67.2.207;
+    deny all;
+
+    auth_basic "Super Secret - Do Not Pass";
+    auth_basic_user_file /etc/nginx/supersecret/htpasswd;
+    proxy_pass http://round_robin_3w;
+    proxy_set_header    X-Real-IP $remote_addr;
+    proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header    Host $http_host;
+}
+```
+
+Restart Nginx dan uji pada client
+
+```bash
+lynx 10.67.4.3:8000
+```
+
+![forbidden](./img/forbidden.png)
+
+Client akan mendapatkan error kode `Forbidden` dari load balancer.
+
+### Fix IP untuk Client
+
+Atur Hwaddress pada kedua Client dengan menambahkan config tambahan pada node Paul dan Dmitri
+
+- `Paul`
+```conf
+auto eth0
+iface eth0 inet dhcp
+hwaddress ether ea:bd:80:c5:98:e2
+```
+
+- `Dmitri`
+```
+auto eth0
+iface eth0 inet dhcp
+hwaddress ether 6e:51:8c:8a:93:d8
+```
+
+Berikan Fix IP untuk Paul dengan mengatur konfigurasi host Paul
+
+- `/etc/dhcp/dhcpd.conf`
+```conf
+host Paul {
+    hardware ethernet ea:bd:80:c5:98:e2;
+    fixed-address 10.67.2.203;
+    option host-name "Paul";
+}
+```
+
+restart isc-dhcp-server kemudian restart juga client Paul bandingkan hasil aksesnya antara Paul dan Dmitri
+
+- `Paul`
+```bash
+lynx 10.67.4.3:8000
+```
+
+![paul 12](./img/paul-12.png)
+
 ## No.13
 ## No.14
 ## No.15
