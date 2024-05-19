@@ -7,6 +7,7 @@
 ## Init
 
 - `init-script.sh`
+
 ```bash
 apt-get update
 apt-get install nginx -y
@@ -168,6 +169,7 @@ service nginx restart
 ## 10-11
 
 - `1011-script.sh`
+
 ```bash
 apt-get update
 apt-get install apache2-utils -y
@@ -213,6 +215,7 @@ service nginx restart
 ## 12
 
 - `12-script.sh`
+
 ```bash
 # Round Robin - 3 Workers
 echo 'upstream round_robin_3w  {
@@ -250,6 +253,51 @@ server {
 ' > /etc/nginx/sites-available/round_robbin_3w.conf
 
 ln -s /etc/nginx/sites-available/round_robbin_3w.conf /etc/nginx/sites-enabled/round_robbin_3w
+
+service nginx restart
+```
+
+### no-18
+
+```bash
+echo 'upstream workers {
+    server 10.67.2.2:8081;
+    server 10.67.2.3:8082;
+    server 10.67.2.4:8083;
+}
+
+server {
+        listen 80;
+        server_name atreides.it07.com;
+
+        location / {
+        proxy_pass http://workers;
+        }
+}' > /etc/nginx/sites-available/laravel
+
+ln -s /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/laravel
+
+service nginx restart
+```
+
+### no-20
+
+```bash
+echo 'upstream workers {
+    least_conn;
+    server 10.67.2.2:8081;
+    server 10.67.2.3:8082;
+    server 10.67.2.4:8083;
+}
+
+server {
+        listen 80;
+        server_name atreides.it07.com;
+
+        location / {
+        proxy_pass http://workers;
+        }
+}' > /etc/nginx/sites-available/laravel
 
 service nginx restart
 ```

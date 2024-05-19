@@ -1045,6 +1045,7 @@ apt-get install php8.0-mbstring php8.0-xml php8.0-cli php8.0-common php8.0-intl 
 apt-get install nginx -y
 
 service nginx start
+service php8.0-fpm start
 ```
 
 2. download file composer, Tambahkan izin eksekusi pada file `composer.phar` dan Pindahkan file `composer.phar` ke `/usr/local/bin/composer`.
@@ -1167,7 +1168,7 @@ echo '
 ### Testing
 
 ```
-ab -n 100 -c 10 -p register.json -T application/json http://10.67.2.2:8081/api/auth/register
+ab -n 100 -c 10 -p register.json -T application/json http://atreides.it07.com:8081/api/auth/register
 ```
 
 ![test register](./img/15.png)
@@ -1189,7 +1190,7 @@ echo '
 ### Testing
 
 ```
-ab -n 100 -c 10 -p login.json -T application/json http://10.67.2.2:8081/api/auth/login
+ab -n 100 -c 10 -p login.json -T application/json http://10atreides.it07.com:8081/api/auth/login
 ```
 
 ![test login](./img/16.png)
@@ -1210,7 +1211,7 @@ apt-get install jq -y
 2. Jalankan command berikut
 
 ```
-curl -X POST -H "Content-Type: application/json" -d @login.json http://10.67.2.3:8082/api/auth/login > login_output.txt
+curl -X POST -H "Content-Type: application/json" -d @login.json http://10.67.2.3:8081/api/auth/login > login_output.txt
 
 token=$(cat login_output.txt | jq -r '.token')
 ```
@@ -1218,7 +1219,7 @@ token=$(cat login_output.txt | jq -r '.token')
 ### Testing
 
 ```
-ab -n 100 -c 10 -H "Authorization: Bearer $token" http://10.67.2.3:8082/api/me
+ab -n 100 -c 10 -H "Authorization: Bearer $token" http://atreides.it07.com:8081/api/me
 ```
 
 ![test get](./img/17.png)
@@ -1267,11 +1268,15 @@ ln -s /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/laravel
 service nginx restart
 ```
 
+note : jangan lupa mengubah ip di `/etc/bind/jarkom_it07/atreides.it07.com` menjadi ip stilgar
+
 ### Testing
 
 ```
 ab -n 100 -c 10 -p login.json -T application/json http://atreides.it07.com/api/auth/login
 ```
+
+![test 18](./img/18.png)
 
 ## No.19
 
@@ -1335,6 +1340,7 @@ php_admin_flag[allow_url_fopen] = off
 
 ; Choose how the process manager will control the number of child processes.
 
+pm = dynamic
 pm.max_children = 25
 pm.start_servers = 22
 pm.min_spare_servers = 5
@@ -1349,7 +1355,7 @@ service nginx restart
 ### Testing Client
 
 ```
-ab -n 100 -c 10 http://10.67.4.3:80/
+ab -n 100 -c 10 http://atreides.it07.com/
 ```
 
 - percobaan 1
@@ -1396,5 +1402,7 @@ service nginx start
 ### Testing Client
 
 ```
-ab -n 100 -c 10 http://10.67.4.3:80/
+ab -n 100 -c 10 http://atreides.it07.com/
 ```
+
+![test 20](./img/20.png)
