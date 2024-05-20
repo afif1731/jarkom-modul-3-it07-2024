@@ -8,6 +8,8 @@
 
 ## Daftar Isi
 
+0. [LB-test-script](./LB-test.sh)
+
 1. [Arakis - Router + DHCP Relay](./Arakis.md)
 
 2. [Irulan - DNS Server](./Irulan.md)

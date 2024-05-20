@@ -268,12 +268,34 @@ echo 'upstream workers {
 
 server {
         listen 80;
-        server_name atreides.it07.com;
+
+        location /app1 {
+            proxy_bind 10.67.2.2;
+            proxy_pass http://10.67.2.2:8081/;
+            rewrite ^/app1(.*)$ http://10.67.2.2:8081/$1 permanent;
+        }
+
+        location /app2 {
+            proxy_bind 10.67.2.3;
+            proxy_pass http://10.67.2.3:8082/;
+            rewrite ^/app2(.*)$ http://10.67.2.3:8082/$1 permanent;
+        }
+
+        location /app3 {
+            proxy_bind 10.67.2.4;
+            proxy_pass http://10.67.2.4:8083/;
+            rewrite ^/app3(.*)$ http://10.67.2.4:8083/$1 permanent;
+        }
 
         location / {
-        proxy_pass http://workers;
+            proxy_pass http://workers;
         }
+
+        error_log /var/log/nginx/lb_error.log;
+        access_log /var/log/nginx/lb_access.log;
 }' > /etc/nginx/sites-available/laravel
+
+unlink /etc/nginx/sites-enabled/default
 
 ln -s /etc/nginx/sites-available/laravel /etc/nginx/sites-enabled/laravel
 
@@ -292,10 +314,27 @@ echo 'upstream workers {
 
 server {
         listen 80;
-        server_name atreides.it07.com;
+
+        location /app1 {
+            proxy_bind 10.67.2.2;
+            proxy_pass http://10.67.2.2:8081/;
+            rewrite ^/app1(.*)$ http://10.67.2.2:8081/$1 permanent;
+        }
+
+        location /app2 {
+            proxy_bind 10.67.2.3;
+            proxy_pass http://10.67.2.3:8082/;
+            rewrite ^/app2(.*)$ http://10.67.2.3:8082/$1 permanent;
+        }
+
+        location /app3 {
+            proxy_bind 10.67.2.4;
+            proxy_pass http://10.67.2.4:8083/;
+            rewrite ^/app3(.*)$ http://10.67.2.4:8083/$1 permanent;
+        }
 
         location / {
-        proxy_pass http://workers;
+            proxy_pass http://workers;
         }
 }' > /etc/nginx/sites-available/laravel
 

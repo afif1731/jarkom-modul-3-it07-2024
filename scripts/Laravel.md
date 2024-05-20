@@ -1,6 +1,12 @@
 # Script Laravel Worker
 
 - [Init](#init)
+- [test no-13](#test-no-13)
+- [no-14](#no-14)
+  - Leto
+  - Duncan
+  - Jessica
+- [no-19](#no-19)
 
 ## Init
 
@@ -8,27 +14,16 @@
 
 ```bash
 apt-get update
-apt-get install apache2 wget unzip php git -y
-
-service apache2 start
-
-git clone https://github.com/martuafernando/laravel-praktikum-jarkom.git laravel_web
-
-mkdir -p /var/www/jarkom_ito7
-
-# meletakkan komponen web
-cp /root/laravel_web/* /var/www/jarkom_it07/
+apt-get install mariadb-client -y
 ```
 
-## no-13
+## test no-13
 
 ```bash
-apt-get update
-apt-get install mariadb-client -y
 mariadb --host=10.67.4.2 --port=3306 --user=kelompokit07 --password=passwordit07 dbkelompokit07  -e "SHOW DATABASES;"
 ```
 
-## no-14.
+## no-14
 
 - Leto
 
@@ -52,10 +47,11 @@ chmod +x composer.phar
 mv composer.phar /usr/local/bin/composer
 
 apt-get install git -y
-cd /var/www && git clone https://github.com/martuafernando/laravel-praktikum-jarkom
-cd /var/www/laravel-praktikum-jarkom && composer update
+cd /var/www
+git clone https://github.com/martuafernando/laravel-praktikum-jarkom
 
-cd /var/www/laravel-praktikum-jarkom && cp .env.example .env
+cd /var/www/laravel-praktikum-jarkom
+composer update
 
 echo 'APP_NAME=Laravel
 APP_ENV=local
@@ -115,15 +111,17 @@ VITE_PUSHER_PORT="${PUSHER_PORT}"
 VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
 VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"' > /var/www/laravel-praktikum-jarkom/.env
 
-cd /var/www/laravel-praktikum-jarkom && php artisan key:generate
-cd /var/www/laravel-praktikum-jarkom && php artisan config:cache
-cd /var/www/laravel-praktikum-jarkom && php artisan migrate:fresh
-cd /var/www/laravel-praktikum-jarkom && php artisan db:seed
-cd /var/www/laravel-praktikum-jarkom && php artisan storage:link
-cd /var/www/laravel-praktikum-jarkom && php artisan jwt:secret
-cd /var/www/laravel-praktikum-jarkom && php artisan config:clear
+php artisan key:generate
+php artisan config:cache
+php artisan migrate:fresh
+php artisan db:seed
+php artisan storage:link
+php artisan jwt:secret
+php artisan config:clear
 
 chown -R www-data.www-data /var/www/laravel-praktikum-jarkom/storage
+
+cd /root
 
 echo '
 server {
@@ -182,10 +180,11 @@ chmod +x composer.phar
 mv composer.phar /usr/local/bin/composer
 
 apt-get install git -y
-cd /var/www && git clone https://github.com/martuafernando/laravel-praktikum-jarkom
-cd /var/www/laravel-praktikum-jarkom && composer update
+cd /var/www
+git clone https://github.com/martuafernando/laravel-praktikum-jarkom
 
-cd /var/www/laravel-praktikum-jarkom && cp .env.example .env
+cd /var/www/laravel-praktikum-jarkom
+composer update
 
 echo 'APP_NAME=Laravel
 APP_ENV=local
@@ -245,15 +244,17 @@ VITE_PUSHER_PORT="${PUSHER_PORT}"
 VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
 VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"' > /var/www/laravel-praktikum-jarkom/.env
 
-cd /var/www/laravel-praktikum-jarkom && php artisan key:generate
-cd /var/www/laravel-praktikum-jarkom && php artisan config:cache
-cd /var/www/laravel-praktikum-jarkom && php artisan migrate:fresh
-cd /var/www/laravel-praktikum-jarkom && php artisan db:seed
-cd /var/www/laravel-praktikum-jarkom && php artisan storage:link
-cd /var/www/laravel-praktikum-jarkom && php artisan jwt:secret
-cd /var/www/laravel-praktikum-jarkom && php artisan config:clear
+php artisan key:generate
+php artisan config:cache
+php artisan migrate:fresh
+php artisan db:seed
+php artisan storage:link
+php artisan jwt:secret
+php artisan config:clear
 
 chown -R www-data.www-data /var/www/laravel-praktikum-jarkom/storage
+
+cd /root
 
 echo '
 server {
@@ -312,10 +313,11 @@ chmod +x composer.phar
 mv composer.phar /usr/local/bin/composer
 
 apt-get install git -y
-cd /var/www && git clone https://github.com/martuafernando/laravel-praktikum-jarkom
-cd /var/www/laravel-praktikum-jarkom && composer update
+cd /var/www
+git clone https://github.com/martuafernando/laravel-praktikum-jarkom
 
-cd /var/www/laravel-praktikum-jarkom && cp .env.example .env
+cd /var/www/laravel-praktikum-jarkom
+composer update
 
 echo 'APP_NAME=Laravel
 APP_ENV=local
@@ -375,19 +377,21 @@ VITE_PUSHER_PORT="${PUSHER_PORT}"
 VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
 VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"' > /var/www/laravel-praktikum-jarkom/.env
 
-cd /var/www/laravel-praktikum-jarkom && php artisan key:generate
-cd /var/www/laravel-praktikum-jarkom && php artisan config:cache
-cd /var/www/laravel-praktikum-jarkom && php artisan migrate:fresh
-cd /var/www/laravel-praktikum-jarkom && php artisan db:seed
-cd /var/www/laravel-praktikum-jarkom && php artisan storage:link
-cd /var/www/laravel-praktikum-jarkom && php artisan jwt:secret
-cd /var/www/laravel-praktikum-jarkom && php artisan config:clear
+php artisan key:generate
+php artisan config:cache
+php artisan migrate:fresh
+php artisan db:seed
+php artisan storage:link
+php artisan jwt:secret
+php artisan config:clear
 
 chown -R www-data.www-data /var/www/laravel-praktikum-jarkom/storage
 
+cd /root
+
 echo '
 server {
-    listen 8081;
+    listen 8083;
 
     root /var/www/laravel-praktikum-jarkom/public;
 
@@ -421,6 +425,8 @@ service php8.0-fpm restart
 ```
 
 ### no-19
+
+[percobaan-laravel](./Percobaan-laravel.sh)
 
 - perocobaan 1
 

@@ -1,6 +1,8 @@
 # Script Client (Dmitri dan Paul)
 
 - [init](#init)
+- [cred](#credential)
+- [17-test](#no-17)
 
 ## Init
 
@@ -8,42 +10,23 @@
 
 ```bash
 apt-get update
-apt-get install dnsutils apache2-utils lynx -y
+apt-get install dnsutils apache2-utils lynx jq -y
 ```
 
-## no-15
+## credential
 
-```bash
-echo '
+- `credential.json`
+```json
 {
   "username": "kelompokit07",
   "password": "passwordit07"
-}' > register.json
-
-ab -n 100 -c 10 -p register.json -T application/json http://atreides.it07.com:8081/api/auth/register
-
+}
 ```
 
-### no-16
+## no-17
 
 ```bash
-echo '
-{
-  "username": "kelompokit07",
-  "password": "passwordit07"
-}' > login.json
-
-ab -n 100 -c 10 -p login.json -T application/json http://10atreides.it07.com:8081/api/auth/login
-
-```
-
-### no-17
-
-```bash
-apt-get update
-apt-get install jq -y
-
-curl -X POST -H "Content-Type: application/json" -d @login.json http://atreides,it07.com:8081/api/auth/login > login_output.txt
+curl -X POST -H "Content-Type: application/json" -d @credential.json http://atreides.it07.com:8081/api/auth/login > login_output.txt
 
 token=$(cat login_output.txt | jq -r '.token')
 

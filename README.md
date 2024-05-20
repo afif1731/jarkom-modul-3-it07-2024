@@ -12,6 +12,9 @@ Praktikum modul 2 jarkom terdiri dari 21 soal yang dikerjakan seluruhnya menggun
 Berikut merupakan cara penyelesaian modul oleh kelompok IT07.
 
 ## No.0 dan 1
+Planet Caladan sedang mengalami krisis karena kehabisan spice, klan atreides berencana untuk melakukan eksplorasi ke planet arakis dipimpin oleh duke leto mereka meregister domain name atreides.yyy.com untuk worker Laravel mengarah pada Leto Atreides . Namun ternyata tidak hanya klan atreides yang berusaha melakukan eksplorasi, Klan harkonen sudah mendaftarkan domain name harkonen.yyy.com untuk worker PHP (0) mengarah pada Vladimir Harkonen
+
+Lakukan konfigurasi sesuai dengan peta yang sudah diberikan.
 
 ### Buat topologi sesuai soal
 
@@ -288,6 +291,10 @@ $TTL    604800
 
 ## No.2
 
+Semua CLIENT harus menggunakan konfigurasi dari DHCP Server.
+
+Client yang melalui House Harkonen mendapatkan range IP dari [prefix IP].1.14 - [prefix IP].1.28 dan [prefix IP].1.49 - [prefix IP].1.70
+
 ### Konfigurasi DHCP Server (Mohiam)
 
 Setup Mohiam untuk menerima jaringan IpV4 dari eth0
@@ -336,6 +343,8 @@ service isc-dhcp-server restart
 
 ## No.3
 
+Client yang melalui House Atreides mendapatkan range IP dari [prefix IP].2.15 - [prefix IP].2.25 dan [prefix IP].2 .200 - [prefix IP].2.210
+
 ### Menambahkan Konfigurasi DHCP Server (Mohiam)
 
 Setelah menambahkan subnet untuk Harkonen, tambahkan pula subnet untuk Atreides dengan menambahkan baris baru pada `/etc/dhcp/dhcpd.conf` dengan range 10.67.2.15 hingga 10.67.2.25 dan 10.67.2.200 hingga 10.67.2.210
@@ -354,6 +363,8 @@ subnet 10.67.2.0 netmask 255.255.255.0 {
 ```
 
 ## No.4
+
+Client mendapatkan DNS dari Princess Irulan dan dapat terhubung dengan internet melalui DNS tersebut
 
 ### Mengarahkan domain name server ke arah DNS Server
 
@@ -438,6 +449,8 @@ namun untuk memastikan bahwa sudah bisa terhubung pada DNS server, lakukan **nsl
 
 ## No.5
 
+Durasi DHCP server meminjamkan alamat IP kepada Client yang melalui House Harkonen selama 5 menit sedangkan pada client yang melalui House Atreides selama 20 menit. Dengan waktu maksimal dialokasikan untuk peminjaman alamat IP selama 87 menit
+
 ### Mengonfigurasi Leasing Times untuk Subnet Harkonen dan Atreides
 
 Tambahkan lease time pada kedua konfigurasi subnet client dengan ketentuan:
@@ -474,6 +487,8 @@ subnet 10.67.2.0 netmask 255.255.255.0 {
 ```
 
 ## No.6
+
+Vladimir Harkonen memerintahkan setiap worker(harkonen) PHP, untuk melakukan konfigurasi virtual host untuk website berikut dengan menggunakan php 7.3.
 
 ### Menginstal keperluan pada PHP Worker
 
@@ -540,6 +555,8 @@ Restart service nginx lalu periksa hasilnya dengan mengaksesnya melalui client
 
 ## No.7
 
+Aturlah agar Stilgar dari fremen dapat dapat bekerja sama dengan maksimal, lalu lakukan testing dengan 5000 request dan 150 request/second.
+
 ### Menginstal Keperluan pada Load Balancer
 
 Instal keperluan pada Stilgar (Load Balancer)
@@ -599,6 +616,13 @@ Hasil yang didapat
 ![hasil ab](./img/no_7_hasil.png)
 
 ## No.8
+
+Karena diminta untuk menuliskan peta tercepat menuju spice, buatlah analisis hasil testing dengan 500 request dan 50 request/second masing-masing algoritma Load Balancer dengan ketentuan sebagai berikut:
+
+- Nama Algoritma Load Balancer
+- Report hasil testing pada Apache Benchmark
+- Grafik request per second untuk masing masing algoritma.
+- Analisis
 
 ### Membuka Port Load Balancer
 
@@ -704,9 +728,11 @@ Kemudian didapat hasil seperti berikut
 
 Hasil lengkapnya dapat diakses pada path `/root/report/`
 
-Analisis kemudian dilakukan pada hasil tersebut untuk kemudian dibuat laporan yang dapat diakses melalui [link berikut]()
+Analisis kemudian dilakukan pada hasil tersebut untuk kemudian dibuat laporan yang dapat diakses melalui [link berikut](https://docs.google.com/document/d/1XDuXZdADYQwS1kBA9vhUOYwM7SZ3cwyaxoOlfSoRVWw/edit?usp=sharing)
 
 ## No.9
+
+Dengan menggunakan algoritma Least-Connection, lakukan testing dengan menggunakan 3 worker, 2 worker, dan 1 worker sebanyak 1000 request dengan 10 request/second, kemudian tambahkan grafiknya pada peta.
 
 ### Membuka Port Load Balancer
 
@@ -786,9 +812,11 @@ Kemudian didapat hasil seperti berikut
 
 Hasil lengkapnya dapat diakses pada path `/root/report/`
 
-Analisis kemudian dilakukan pada hasil tersebut untuk kemudian dibuat laporan yang dapat diakses melalui [link berikut]()
+Analisis kemudian dilakukan pada hasil tersebut untuk kemudian dibuat laporan yang dapat diakses melalui [link berikut](https://docs.google.com/document/d/1XDuXZdADYQwS1kBA9vhUOYwM7SZ3cwyaxoOlfSoRVWw/edit?usp=sharing)
 
 ## No.10
+
+Selanjutnya coba tambahkan keamanan dengan konfigurasi autentikasi di LB dengan dengan kombinasi username: “secmart” dan password: “kcksyyy”, dengan yyy merupakan kode kelompok. Terakhir simpan file “htpasswd” nya di /etc/nginx/supersecret/
 
 ### Menambahkan Konfigurasi pada Load Balancer
 
@@ -831,6 +859,8 @@ lynx 10.67.4.3:8000
 
 ## No.11
 
+Lalu buat untuk setiap request yang mengandung /dune akan di proxy passing menuju halaman https://www.dunemovie.com.au/.
+
 ### Menambahkan Konfigurasi pada Laod Balancer
 
 Pada konfigurasi load balancer, buat pengaturan tambahan yang akan menghapus path `/dune` kemudian mengarahkannya kepada `https://www.dunemovie.com.au` diikuti dengan path yang mungkin ditambahkan setelah /dune
@@ -866,6 +896,8 @@ lynx 10.67.4.3:8000/dune/characters
 ![tesh1](./img/tesh2.png)
 
 ## No.12
+
+Selanjutnya LB ini hanya boleh diakses oleh client dengan IP [Prefix IP].1.37, [Prefix IP].1.67, [Prefix IP].2.203, dan [Prefix IP].2.207.
 
 ### Menambahkan IP yang diizinkan
 
