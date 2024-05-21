@@ -12,6 +12,7 @@ Praktikum modul 2 jarkom terdiri dari 21 soal yang dikerjakan seluruhnya menggun
 Berikut merupakan cara penyelesaian modul oleh kelompok IT07.
 
 ## No.0 dan 1
+
 Planet Caladan sedang mengalami krisis karena kehabisan spice, klan atreides berencana untuk melakukan eksplorasi ke planet arakis dipimpin oleh duke leto mereka meregister domain name atreides.yyy.com untuk worker Laravel mengarah pada Leto Atreides . Namun ternyata tidak hanya klan atreides yang berusaha melakukan eksplorasi, Klan harkonen sudah mendaftarkan domain name harkonen.yyy.com untuk worker PHP (0) mengarah pada Vladimir Harkonen
 
 Lakukan konfigurasi sesuai dengan peta yang sudah diberikan.
@@ -1037,7 +1038,7 @@ FLUSH PRIVILEGES;
 
 ```
 apt-get update
-apt-get install apache2-utils
+apt-get install mariadb-client -y
 ```
 
 2. jalankan command berikut
@@ -1222,7 +1223,7 @@ echo '
 ### Testing
 
 ```
-ab -n 100 -c 10 -p login.json -T application/json http://10atreides.it07.com:8081/api/auth/login
+ab -n 100 -c 10 -p login.json -T application/json http://atreides.it07.com:8081/api/auth/login
 ```
 
 ![test login](./img/16.png)
@@ -1243,7 +1244,7 @@ apt-get install jq -y
 2. Jalankan command berikut
 
 ```
-curl -X POST -H "Content-Type: application/json" -d @login.json http://10.67.2.3:8081/api/auth/login > login_output.txt
+curl -X POST -H "Content-Type: application/json" -d @login.json http://atreides.it07.com:8081/api/auth/login > login_output.txt
 
 token=$(cat login_output.txt | jq -r '.token')
 ```
